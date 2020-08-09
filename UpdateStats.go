@@ -56,8 +56,6 @@ func captureData(account *Account, driver selenium.WebDriver, screenshotPath str
 	url := account.FullURL
 	accountName := account.AccountName
 
-	fmt.Println("URL " + url)
-
 	if err := driver.Get(url); err != nil {
 		fmt.Println(err)
 		log.Fatal(err)
@@ -91,7 +89,6 @@ func captureData(account *Account, driver selenium.WebDriver, screenshotPath str
 
 	account.Followers = followerNumber
 	account.Likes = likesNumber
-	fmt.Printf("Account at the end %v\n", account)
 }
 
 func errChk(err error) {
@@ -262,14 +259,13 @@ func differenceFormat(difference string) (formattedString string) {
 	}
 	switch fullLength := len(difference); {
 	case fullLength >= 10:
-		fmt.Println("Billion")
+		// fmt.Println("Billion")
 	case fullLength >= 7:
 		if len(newString) <= 1 {
 			formattedString = newString + "M"
 		} else {
 			formattedString = newString[0:1] + "." + newString[1:] + "M"
 		}
-		fmt.Println(formattedString)
 	case fullLength >= 4:
 		if len(newString) <= 1 {
 			formattedString = newString + "00K"
@@ -383,12 +379,8 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 
 	newColumn := state.FirstBlockStart + 1
 	newColumnName, err := excelize.ColumnNumberToName(int(newColumn))
-	fmt.Println("new column is " + newColumnName)
-	fmt.Println("dateFormat is " + dateFormat)
 
-	//followersUpdateCell := newSheet.Title + "!" + newColumnName + "2:" + newColumnName + "2"
 	followersUpdateCell := fmt.Sprintf("%s!%s%d:%s%d", newSheet.Title, newColumnName, upperHeaderRowNumber, newColumnName, upperHeaderRowNumber)
-	fmt.Println(followersUpdateCell)
 	values.Range = followersUpdateCell
 
 	updateCall := srv.Spreadsheets.Values.Update(spreadSheetID, followersUpdateCell, &values)
@@ -397,10 +389,7 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 	_, err = updateCall.Do()
 
 	// Likes
-	// likesUpdateCell := newSheet.Title + "!" + newColumnName + "28:" + newColumnName + "28"
-	//likesUpdateCell := newSheet.Title + "!" + newColumnName + "29:" + newColumnName + "29"
 	likesUpdateCell := fmt.Sprintf("%s!%s%d:%s%d", newSheet.Title, newColumnName, lowerHeaderRowNumber, newColumnName, lowerHeaderRowNumber)
-	fmt.Println(likesUpdateCell)
 	values.Range = likesUpdateCell
 
 	updateCall = srv.Spreadsheets.Values.Update(spreadSheetID, likesUpdateCell, &values)
@@ -450,52 +439,7 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 		},
 	}
 
-	// thirdSectionCopyPasteRequestTop := sheets.Request{
-	// 	CopyPaste: &sheets.CopyPasteRequest{
-	// 		PasteOrientation: "NORMAL",
-	// 		PasteType:        "PASTE_VALUES",
-	// 		Source: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 1,
-	// 			StartRowIndex:    1,
-	// 			EndColumnIndex:   state.ThirdBlockStart,
-	// 			EndRowIndex:      26,
-	// 		},
-	// 		Destination: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 2,
-	// 			StartRowIndex:    1,
-	// 			EndColumnIndex:   state.ThirdBlockStart - 1,
-	// 			EndRowIndex:      26,
-	// 		},
-	// 	},
-	// }
-
-	// thirdSectionCopyPasteRequestBottom := sheets.Request{
-	// 	CopyPaste: &sheets.CopyPasteRequest{
-	// 		PasteOrientation: "NORMAL",
-	// 		PasteType:        "PASTE_VALUES",
-	// 		Source: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 1,
-	// 			StartRowIndex:    28,
-	// 			EndColumnIndex:   state.ThirdBlockStart,
-	// 			EndRowIndex:      53,
-	// 		},
-	// 		Destination: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 2,
-	// 			StartRowIndex:    28,
-	// 			EndColumnIndex:   state.ThirdBlockStart - 1,
-	// 			EndRowIndex:      53,
-	// 		},
-	// 	},
-	// }
-
-	// Let's update values
-	//followerReadRange := newSheet.Title + "!" + "B3:B26"
 	followerReadRange := fmt.Sprintf("%s!B%d:B%d", newSheet.Title, upperHeaderRowNumber+1, upperHeaderRowNumber+numberOfAccounts)
-	fmt.Printf("\n\tfollowerReadRange: %s\n", followerReadRange)
 	followerReadResp, err := srv.Spreadsheets.Values.Get(spreadSheetID, followerReadRange).Do()
 	if err != nil {
 		log.Fatal(err)
@@ -504,7 +448,6 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 		fmt.Println("COULDN'T FIND FOLLOWERS")
 	} else {
 		for i, row := range followerReadResp.Values {
-			//fmt.Printf("%s\n", row[0])
 			platform := row[0]
 			for j, accObj := range accounts {
 				if accObj.Platform == platform {
@@ -534,7 +477,6 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 		fmt.Println("COULDN'T FIND LIKES")
 	} else {
 		for i, row := range likesReadResp.Values {
-			//fmt.Printf("%s\n", row[0])
 			paltform := row[0]
 			for _, accObj := range accounts {
 				if accObj.Platform == paltform {
@@ -600,48 +542,6 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 		},
 	}
 
-	// mainCopyPasteRequestThirdTop := sheets.Request{
-	// 	CopyPaste: &sheets.CopyPasteRequest{
-	// 		PasteOrientation: "NORMAL",
-	// 		PasteType:        "PASTE_VALUES",
-	// 		Source: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.FirstBlockStart,
-	// 			StartRowIndex:    1,
-	// 			EndColumnIndex:   state.FirstBlockStart + 1,
-	// 			EndRowIndex:      26,
-	// 		},
-	// 		Destination: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 1,
-	// 			StartRowIndex:    1,
-	// 			EndColumnIndex:   state.ThirdBlockStart,
-	// 			EndRowIndex:      26,
-	// 		},
-	// 	},
-	// }
-
-	// mainCopyPasteRequestThirdBottom := sheets.Request{
-	// 	CopyPaste: &sheets.CopyPasteRequest{
-	// 		PasteOrientation: "NORMAL",
-	// 		PasteType:        "PASTE_VALUES",
-	// 		Source: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.FirstBlockStart,
-	// 			StartRowIndex:    28,
-	// 			EndColumnIndex:   state.FirstBlockStart + 1,
-	// 			EndRowIndex:      53,
-	// 		},
-	// 		Destination: &sheets.GridRange{
-	// 			SheetId:          newSheet.SheetId,
-	// 			StartColumnIndex: state.ThirdBlockStart - 1,
-	// 			StartRowIndex:    28,
-	// 			EndColumnIndex:   state.ThirdBlockStart,
-	// 			EndRowIndex:      53,
-	// 		},
-	// 	},
-	// }
-
 	sortSpecArray := []*sheets.SortSpec{}
 	sortSpecArray = append(sortSpecArray, &sheets.SortSpec{SortOrder: "DESCENDING", DimensionIndex: newColumn - 1})
 
@@ -674,12 +574,8 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 	requests = []*sheets.Request{}
 	requests = append(requests, &secondSectionCopyPasteRequestTop)
 	requests = append(requests, &secondSectionCopyPasteRequestBottom)
-	// requests = append(requests, &thirdSectionCopyPasteRequestTop)
-	// requests = append(requests, &thirdSectionCopyPasteRequestBottom)
 	requests = append(requests, &mainCopyPasteRequestSecondTop)
 	requests = append(requests, &mainCopyPasteRequestSecondBottom)
-	// requests = append(requests, &mainCopyPasteRequestThirdTop)
-	// requests = append(requests, &mainCopyPasteRequestThirdBottom)
 	requests = append(requests, &sortMainSectionFollowersRequest)
 	requests = append(requests, &sortMainSectionLikesRequest)
 
@@ -691,33 +587,9 @@ func spreadSheetWork(srv *sheets.Service, newSheetName string, oldSheetName stri
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Now let's set the names for the differences
-	followerDifferenceRange := newSheet.Title + "!" + "AM3:AM26"
-	followerDifferenceRangeResp, err := srv.Spreadsheets.Values.Get(spreadSheetID, followerDifferenceRange).Do()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(followerDifferenceRangeResp.Values) == 0 {
-		fmt.Println("COULDN'T FIND PLATFORMS")
-	} else {
-		for i, row := range followerDifferenceRangeResp.Values {
-			sheetString := row[0].(string)
-			normalizedString := strings.Replace(sheetString, ",", "", -1)
-			// difference, _ := strconv.ParseInt(normalizedString, 10, 64)
-			differenceString := differenceFormat(normalizedString)
-			for _, acctObj := range accounts {
-				if acctObj.SheetRowNum == i {
-					acctObj.Difference = acctObj.Platform + "(" + differenceString + ")"
-					// fmt.Printf("Platform %s will have this new string %s\n", acctObj.Platform, acctObj.Difference)
-				}
-			}
-		}
-	}
 }
 
 func main() {
-	fmt.Printf("Beginning the run...\n")
 	// Create screenshot directory
 	currentWD, err := os.Getwd()
 	errChk(err)
@@ -815,30 +687,19 @@ func main() {
 		captureData(account, driver, screenshotPath)
 	}
 
-	fmt.Printf("\n\tFirst account: %v \n", accounts[0])
-
 	// Time to go to work!
 	currentDate := time.Now()
 	dateFormat := currentDate.Format("01/02/2006")
 	dayOfWeek := currentDate.Weekday()
 	prevDate := time.Now().AddDate(0, 0, -7)
-	// switch prevDate.Weekday().String() {
-	// case "Monday":
-	// 	prevDate = time.Now().AddDate(0, 0, -3)
-	// case "Tuesday":
-	// 	prevDate = time.Now().AddDate(0, 0, -1)
-	// case "Friday":
-	// 	prevDate = time.Now().AddDate(0, 0, -3)
-	// }
 	oldSheetName := prevDate.Format("01/02/2006") + " (" + prevDate.Weekday().String()[:1] + ")"
-	//oldSheetName := "07/01/2020 (W)"
-	fmt.Println("Old Sheet Name " + oldSheetName)
 	newSheetName := dateFormat + " (" + dayOfWeek.String()[:1] + ")"
-	oldSheetName = "08/04/2020 (T)"
-	newSheetName = "TEST"
+	// TESTING
+	//oldSheetName = "08/04/2020 (T)"
+	//newSheetName = "TEST"
 	spreadSheetWork(srv, newSheetName, oldSheetName, dateFormat, state, accounts)
-	// state.FirstBlockStart++
-	// state.SecondBlockStart++
-	// state.ThirdBlockStart++
-	// saveSaveStateToFile("saveState.json", state)
+	state.FirstBlockStart++
+	state.SecondBlockStart++
+	state.ThirdBlockStart++
+	saveSaveStateToFile("saveState.json", state)
 }
